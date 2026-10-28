@@ -1,4 +1,5 @@
-package cl.appescuelamarcelapaz.app.ui.UI
+package cl.appescuelamarcelapaz.app.ui.theme
+
 
 import androidx.compose.ui.graphics.Color
 

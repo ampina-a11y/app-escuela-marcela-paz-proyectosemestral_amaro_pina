@@ -37,6 +37,11 @@ android {
 }
 
 dependencies {
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7") // ViewModel y StateFlow para Compose
+    implementation("androidx.navigation:navigation-compose:2.8.5") // Navigation Compose (para movernos entre pantallas)
+    implementation("androidx.datastore:datastore-preferences:1.1.1") // DataStore (para persistencia local de la sesión)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
