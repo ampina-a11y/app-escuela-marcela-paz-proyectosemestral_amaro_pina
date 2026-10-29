@@ -52,7 +52,7 @@ fun LoginScreen(
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "Portal de Apoderados",
+            text = "Portal de Docentes",
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(bottom = 32.dp)
         )

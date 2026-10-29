@@ -3,7 +3,7 @@ package cl.appescuelamarcelapaz.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import cl.appescuelamarcelapaz.app.ui.login.LoginScreen
+import cl.appescuelamarcelapaz.app.navigation.AppNavigation
 import cl.appescuelamarcelapaz.app.ui.theme.AppEscuelaMarcelaPazTheme
 
 class MainActivity : ComponentActivity() {
@@ -11,7 +11,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AppEscuelaMarcelaPazTheme {
-                LoginScreen(onLoginSuccess = { /* luego navegamos a Home */ })
+                AppNavigation()
             }
         }
     }
