@@ -35,6 +35,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.appescuelamarcelapaz.app.data.local.UserPreferences
 import cl.appescuelamarcelapaz.app.data.repository.AuthRepository
 import cl.appescuelamarcelapaz.app.domain.model.Rol
+import cl.appescuelamarcelapaz.app.ui.MisReservas.MisReservasScreen
+import cl.appescuelamarcelapaz.app.ui.inspectoria.SolicitudesPendientesScreen
 
 data class TabItem(
     val label: String,
@@ -45,7 +47,7 @@ data class TabItem(
 fun HomeScreen(
     rol: Rol,
     onNavigateToReserva: () -> Unit,
-    onLogout: () -> Unit, // <-- Nueva acción
+    onLogout: () -> Unit,
     viewModel: HomeViewModel = viewModel(
         factory = HomeViewModelFactory(
             AuthRepository(UserPreferences(LocalContext.current))
@@ -82,21 +84,17 @@ fun HomeScreen(
             }
         }
     ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             if (rol == Rol.INSPECTORIA) {
                 when (selectedIndex) {
-                    0 -> ContentInspectoriaSolicitudes()
-                    1 -> PlaceholderContent("Gestión de Espacios")
+                    0 -> SolicitudesPendientesScreen() // <-- Conectado
+                    1 -> PlaceholderContent("Gestión de Espacios (En desarrollo para EFT)")
                     2 -> PerfilContent(onLogoutClick = { viewModel.cerrarSesion(onLogout) })
                 }
             } else {
                 when (selectedIndex) {
                     0 -> ContentSolicitanteCatalogo(onNavigateToReserva)
-                    1 -> PlaceholderContent("Mis Reservas")
+                    1 -> MisReservasScreen() // <-- Conectado
                     2 -> PerfilContent(onLogoutClick = { viewModel.cerrarSesion(onLogout) })
                 }
             }
@@ -129,7 +127,7 @@ private fun ContentSolicitanteCatalogo(onNavigateToReserva: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Catálogo de Espacios")
+        Text("Catálogo de Espacios (Mock para MVP)")
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onNavigateToReserva) {
             Text("Reservar un espacio")
@@ -138,24 +136,8 @@ private fun ContentSolicitanteCatalogo(onNavigateToReserva: () -> Unit) {
 }
 
 @Composable
-private fun ContentInspectoriaSolicitudes() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("Solicitudes Pendientes")
-        Spacer(modifier = Modifier.height(16.dp))
-        Text("Aquí aparecerán las reservas para aprobar/rechazar")
-    }
-}
-
-@Composable
 private fun PlaceholderContent(text: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(text = text)
     }
 }
