@@ -1,4 +1,4 @@
-package cl.appescuelamarcelapaz.app.ui.reserva
+package cl.appescuelamarcelapaz.app.ui.Reserva
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
