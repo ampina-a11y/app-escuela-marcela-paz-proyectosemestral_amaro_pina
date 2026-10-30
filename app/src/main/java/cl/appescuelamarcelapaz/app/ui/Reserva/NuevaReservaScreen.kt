@@ -1,6 +1,11 @@
 package cl.appescuelamarcelapaz.app.ui.Reserva
 
 import android.app.DatePickerDialog
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -51,7 +56,6 @@ fun NuevaReservaScreen(
     val context = LocalContext.current
     val notificationHelper = remember { NotificationHelper(context) }
 
-    // --- Lógica del DatePicker ---
     var mostrarDatePicker by remember { mutableStateOf(false) }
     val calendario = Calendar.getInstance()
 
@@ -59,7 +63,6 @@ fun NuevaReservaScreen(
         DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
-                // Formateamos a YYYY-MM-DD (el mes en Calendar empieza en 0)
                 val mesFormateado = String.format("%02d", month + 1)
                 val diaFormateado = String.format("%02d", dayOfMonth)
                 viewModel.onFechaChange("$year-$mesFormateado-$diaFormateado")
@@ -69,7 +72,6 @@ fun NuevaReservaScreen(
             calendario.get(Calendar.MONTH),
             calendario.get(Calendar.DAY_OF_MONTH)
         ).apply {
-            // Opcional: evitar que seleccionen fechas pasadas en el calendario
             datePicker.minDate = System.currentTimeMillis() - 1000
         }.show()
     }
@@ -103,7 +105,16 @@ fun NuevaReservaScreen(
             onValueChange = viewModel::onActividadChange,
             label = { Text("Actividad a realizar") },
             isError = uiState.actividadError != null,
-            supportingText = { uiState.actividadError?.let { Text(it, color = MaterialTheme.colorScheme.error) } },
+            supportingText = {
+                // Animación para el error
+                AnimatedVisibility(
+                    visible = uiState.actividadError != null,
+                    enter = fadeIn() + slideInVertically(),
+                    exit = fadeOut() + slideOutVertically()
+                ) {
+                    Text(uiState.actividadError ?: "", color = MaterialTheme.colorScheme.error)
+                }
+            },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -114,7 +125,15 @@ fun NuevaReservaScreen(
             onValueChange = viewModel::onCursoChange,
             label = { Text("Curso o grupo") },
             isError = uiState.cursoError != null,
-            supportingText = { uiState.cursoError?.let { Text(it, color = MaterialTheme.colorScheme.error) } },
+            supportingText = {
+                AnimatedVisibility(
+                    visible = uiState.cursoError != null,
+                    enter = fadeIn() + slideInVertically(),
+                    exit = fadeOut() + slideOutVertically()
+                ) {
+                    Text(uiState.cursoError ?: "", color = MaterialTheme.colorScheme.error)
+                }
+            },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -126,24 +145,39 @@ fun NuevaReservaScreen(
             label = { Text("Cantidad de asistentes") },
             leadingIcon = { Icon(Icons.Default.People, contentDescription = null) },
             isError = uiState.cantidadError != null,
-            supportingText = { uiState.cantidadError?.let { Text(it, color = MaterialTheme.colorScheme.error) } },
+            supportingText = {
+                AnimatedVisibility(
+                    visible = uiState.cantidadError != null,
+                    enter = fadeIn() + slideInVertically(),
+                    exit = fadeOut() + slideOutVertically()
+                ) {
+                    Text(uiState.cantidadError ?: "", color = MaterialTheme.colorScheme.error)
+                }
+            },
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(8.dp))
 
-        // --- CAMPO DE FECHA MODIFICADO CON EL NATIVO ---
         OutlinedTextField(
             value = uiState.fecha,
             onValueChange = { },
-            readOnly = true, // Evita que el teclado se abra
+            readOnly = true,
             label = { Text("Fecha (Seleccionar)") },
             leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = null) },
             isError = uiState.fechaError != null,
-            supportingText = { uiState.fechaError?.let { Text(it, color = MaterialTheme.colorScheme.error) } },
+            supportingText = {
+                AnimatedVisibility(
+                    visible = uiState.fechaError != null,
+                    enter = fadeIn() + slideInVertically(),
+                    exit = fadeOut() + slideOutVertically()
+                ) {
+                    Text(uiState.fechaError ?: "", color = MaterialTheme.colorScheme.error)
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { mostrarDatePicker = true } // Abre el calendario al tocar
+                .clickable { mostrarDatePicker = true }
         )
 
         Spacer(Modifier.height(8.dp))
@@ -165,8 +199,15 @@ fun NuevaReservaScreen(
                 modifier = Modifier.weight(1f)
             )
         }
+
         uiState.horaError?.let {
-            Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
+            AnimatedVisibility(
+                visible = uiState.horaError != null,
+                enter = fadeIn() + slideInVertically(),
+                exit = fadeOut() + slideOutVertically()
+            ) {
+                Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
+            }
         }
 
         Spacer(Modifier.height(24.dp))

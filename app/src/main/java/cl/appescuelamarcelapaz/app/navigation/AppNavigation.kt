@@ -1,5 +1,8 @@
 package cl.appescuelamarcelapaz.app.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -13,9 +16,9 @@ import androidx.navigation.compose.rememberNavController
 import cl.appescuelamarcelapaz.app.data.local.UserPreferences
 import cl.appescuelamarcelapaz.app.data.repository.AuthRepository
 import cl.appescuelamarcelapaz.app.domain.model.Rol
-import cl.appescuelamarcelapaz.app.ui.Reserva.NuevaReservaScreen
 import cl.appescuelamarcelapaz.app.ui.home.HomeScreen
 import cl.appescuelamarcelapaz.app.ui.login.LoginScreen
+import cl.appescuelamarcelapaz.app.ui.Reserva.NuevaReservaScreen
 import kotlinx.coroutines.flow.first
 
 sealed class Route(val path: String) {
@@ -46,7 +49,10 @@ fun AppNavigation() {
     if (!isLoading) {
         NavHost(
             navController = navController,
-            startDestination = startRoute
+            startDestination = startRoute,
+            // Animaciones globales para todas las pantallas
+            enterTransition = { fadeIn(animationSpec = tween(400)) },
+            exitTransition = { fadeOut(animationSpec = tween(400)) }
         ) {
             composable(Route.Login.path) {
                 LoginScreen(
@@ -65,7 +71,6 @@ fun AppNavigation() {
                     onNavigateToReserva = { navController.navigate(Route.NuevaReserva.path) },
                     onLogout = {
                         navController.navigate(Route.Login.path) {
-                            // Borra todo el historial para que no pueda volver atrás
                             popUpTo(0) { inclusive = true }
                         }
                     }
