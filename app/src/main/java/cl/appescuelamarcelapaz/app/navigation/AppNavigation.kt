@@ -8,10 +8,9 @@ import cl.appescuelamarcelapaz.app.ui.home.HomeScreen
 import cl.appescuelamarcelapaz.app.ui.login.LoginScreen
 
 sealed class Route(val path: String) {
-    data object Login : Route("login")
-    data object Home : Route("home")
+    object Login : Route("login")
+    object Home : Route("home")
 }
-
 
 @Composable
 fun AppNavigation() {
@@ -23,10 +22,8 @@ fun AppNavigation() {
     ) {
         composable(Route.Login.path) {
             LoginScreen(
-                onLoginSuccess = {
-                    navController.navigate(Route.Home.path) {
-                        popUpTo(Route.Login.path) { inclusive = true }
-                    }
+                onLoginSuccess = { rol ->
+                    navController.navigate(Route.Home.path)
                 }
             )
         }

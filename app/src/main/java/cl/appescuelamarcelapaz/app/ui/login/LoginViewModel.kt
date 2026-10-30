@@ -1,106 +1,73 @@
 package cl.appescuelamarcelapaz.app.ui.login
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import android.util.Patterns
+import androidx.lifecycle.ViewModel
+import cl.appescuelamarcelapaz.app.domain.model.Rol
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
-@Composable
-fun LoginScreen(
-    onLoginSuccess: () -> Unit,
-    viewModel: LoginViewModel = viewModel()
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+data class LoginUiState(
+    val email: String = "",
+    val password: String = "",
+    val rol: Rol? = null,
+    val emailError: String? = null,
+    val passwordError: String? = null,
+    val rolError: String? = null,
+    val isLoading: Boolean = false,
+    val loginExitoso: Boolean = false
+)
 
-    LaunchedEffect(uiState.loginExitoso) {
-        if (uiState.loginExitoso) onLoginSuccess()
+class LoginViewModel : ViewModel() {
+
+    private val _uiState = MutableStateFlow(LoginUiState())
+    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
+
+    fun onEmailChange(email: String) {
+        _uiState.update { it.copy(email = email, emailError = null) }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Escuela Marcela Paz",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = "Portal de Docentes",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
+    fun onPasswordChange(password: String) {
+        _uiState.update { it.copy(password = password, passwordError = null) }
+    }
 
-        OutlinedTextField(
-            value = uiState.email,
-            onValueChange = viewModel::onEmailChange,
-            label = { Text("Correo electrónico") },
-            leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
-            isError = uiState.emailError != null,
-            supportingText = {
-                uiState.emailError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
+    fun onRolChange(rol: Rol) {
+        _uiState.update { it.copy(rol = rol, rolError = null) }
+    }
 
-        Spacer(Modifier.height(16.dp))
+    fun login() {
+        val state = _uiState.value
+        val emailError = validarEmail(state.email)
+        val passwordError = validarPassword(state.password)
+        val rolError = validarRol(state.rol)
 
-        OutlinedTextField(
-            value = uiState.password,
-            onValueChange = viewModel::onPasswordChange,
-            label = { Text("Contraseña") },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
-            visualTransformation = PasswordVisualTransformation(),
-            isError = uiState.passwordError != null,
-            supportingText = {
-                uiState.passwordError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
-
-        Spacer(Modifier.height(24.dp))
-
-        Button(
-            onClick = viewModel::login,
-            enabled = !uiState.isLoading,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
+        if (emailError != null || passwordError != null || rolError != null) {
+            _uiState.update {
+                it.copy(
+                    emailError = emailError,
+                    passwordError = passwordError,
+                    rolError = rolError
                 )
-            } else {
-                Text("Ingresar")
             }
+            return
         }
+
+        _uiState.update { it.copy(isLoading = true, loginExitoso = true) }
     }
+
+    private fun validarEmail(email: String): String? = when {
+        email.isBlank() -> "El correo es obligatorio"
+        !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Formato de correo inválido"
+        else -> null
+    }
+
+    private fun validarPassword(password: String): String? = when {
+        password.isBlank() -> "La contraseña es obligatoria"
+        password.length < 6 -> "La contraseña debe tener al menos 6 caracteres"
+        else -> null
+    }
+
+    private fun validarRol(rol: Rol?): String? =
+        if (rol == null) "Debes seleccionar un rol" else null
 }
