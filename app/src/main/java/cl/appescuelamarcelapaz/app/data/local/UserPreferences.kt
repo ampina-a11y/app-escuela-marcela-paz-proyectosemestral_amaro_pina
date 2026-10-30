@@ -21,18 +21,15 @@ class UserPreferences(private val context: Context) {
         private val USER_EMAIL = stringPreferencesKey("user_email")
     }
 
-    // Flujo que emite si hay sesión activa o no
     val isLoggedInFlow: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[IS_LOGGED_IN] ?: false
     }
 
-    // Flujo que emite el rol guardado (por defecto Solicitante si hay error)
     val userRoleFlow: Flow<Rol> = context.dataStore.data.map { prefs ->
         val rolStr = prefs[USER_ROLE]
         if (rolStr == Rol.INSPECTORIA.name) Rol.INSPECTORIA else Rol.SOLICITANTE
     }
 
-    // Guardar la sesión
     suspend fun saveSession(email: String, rol: Rol) {
         context.dataStore.edit { prefs ->
             prefs[IS_LOGGED_IN] = true
