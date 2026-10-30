@@ -25,17 +25,25 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cl.appescuelamarcelapaz.app.data.local.UserPreferences
+import cl.appescuelamarcelapaz.app.data.repository.AuthRepository
 import cl.appescuelamarcelapaz.app.domain.model.Rol
 
 @Composable
 fun LoginScreen(
     onLoginSuccess: (Rol) -> Unit,
-    viewModel: LoginViewModel = viewModel()
+    // Inyectamos el repositorio y la fábrica aquí
+    viewModel: LoginViewModel = viewModel(
+        factory = LoginViewModelFactory(
+            AuthRepository(UserPreferences(LocalContext.current))
+        )
+    )
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

@@ -2,11 +2,14 @@ package cl.appescuelamarcelapaz.app.ui.login
 
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import cl.appescuelamarcelapaz.app.data.repository.AuthRepository
 import cl.appescuelamarcelapaz.app.domain.model.Rol
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 data class LoginUiState(
     val email: String = "",
@@ -19,7 +22,8 @@ data class LoginUiState(
     val loginExitoso: Boolean = false
 )
 
-class LoginViewModel : ViewModel() {
+// Ahora el ViewModel recibe el repositorio
+class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -44,16 +48,18 @@ class LoginViewModel : ViewModel() {
 
         if (emailError != null || passwordError != null || rolError != null) {
             _uiState.update {
-                it.copy(
-                    emailError = emailError,
-                    passwordError = passwordError,
-                    rolError = rolError
-                )
+                it.copy(emailError = emailError, passwordError = passwordError, rolError = rolError)
             }
             return
         }
 
-        _uiState.update { it.copy(isLoading = true, loginExitoso = true) }
+        _uiState.update { it.copy(isLoading = true) }
+
+        // Guardamos en DataStore usando corrutinas
+        viewModelScope.launch {
+            authRepository.login(state.email, state.rol!!)
+            _uiState.update { it.copy(isLoading = false, loginExitoso = true) }
+        }
     }
 
     private fun validarEmail(email: String): String? = when {
