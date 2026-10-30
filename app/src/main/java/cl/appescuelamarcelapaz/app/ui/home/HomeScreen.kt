@@ -14,7 +14,9 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Room
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -27,7 +29,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import cl.appescuelamarcelapaz.app.data.local.UserPreferences
+import cl.appescuelamarcelapaz.app.data.repository.AuthRepository
 import cl.appescuelamarcelapaz.app.domain.model.Rol
 
 data class TabItem(
@@ -38,7 +44,13 @@ data class TabItem(
 @Composable
 fun HomeScreen(
     rol: Rol,
-    onNavigateToReserva: () -> Unit // Callback para viajar al formulario
+    onNavigateToReserva: () -> Unit,
+    onLogout: () -> Unit, // <-- Nueva acción
+    viewModel: HomeViewModel = viewModel(
+        factory = HomeViewModelFactory(
+            AuthRepository(UserPreferences(LocalContext.current))
+        )
+    )
 ) {
     val tabs = if (rol == Rol.INSPECTORIA) {
         listOf(
@@ -79,15 +91,33 @@ fun HomeScreen(
                 when (selectedIndex) {
                     0 -> ContentInspectoriaSolicitudes()
                     1 -> PlaceholderContent("Gestión de Espacios")
-                    2 -> PlaceholderContent("Perfil de Inspectoría")
+                    2 -> PerfilContent(onLogoutClick = { viewModel.cerrarSesion(onLogout) })
                 }
             } else {
                 when (selectedIndex) {
                     0 -> ContentSolicitanteCatalogo(onNavigateToReserva)
                     1 -> PlaceholderContent("Mis Reservas")
-                    2 -> PlaceholderContent("Perfil de Solicitante")
+                    2 -> PerfilContent(onLogoutClick = { viewModel.cerrarSesion(onLogout) })
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun PerfilContent(onLogoutClick: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("Mi Perfil")
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(
+            onClick = onLogoutClick,
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+        ) {
+            Text("Cerrar Sesión", color = MaterialTheme.colorScheme.onError)
         }
     }
 }

@@ -55,14 +55,14 @@ class NuevaReservaViewModel : ViewModel() {
             fechaParseada = LocalDate.parse(state.fecha)
             fechaError = ReservaValidator.validarAnticipacion(fechaParseada)
         } catch (e: Exception) {
-            fechaError = "Formato de fecha inválido (Use YYYY-MM-DD)"
+            fechaError = "Debes seleccionar una fecha válida"
         }
 
         // Validar horas
         val horaError = when {
             state.horaInicio.isBlank() || state.horaFin.isBlank() -> "Debe ingresar hora de inicio y fin"
             state.horaInicio >= state.horaFin -> "La hora de fin debe ser mayor a la de inicio"
-            else -> ReservaValidator.validarDuplicado(state.horaInicio, state.horaFin, emptyList()) // Lista vacía por ahora
+            else -> ReservaValidator.validarDuplicado(state.horaInicio, state.horaFin, emptyList())
         }
 
         if (actividadError != null || cursoError != null || cantidadError != null || fechaError != null || horaError != null) {
@@ -80,7 +80,7 @@ class NuevaReservaViewModel : ViewModel() {
 
         _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
-            // Aquí simulamos guardado y éxito
+            // Simulamos guardado
             _uiState.update { it.copy(isLoading = false, reservaExitosa = true) }
         }
     }

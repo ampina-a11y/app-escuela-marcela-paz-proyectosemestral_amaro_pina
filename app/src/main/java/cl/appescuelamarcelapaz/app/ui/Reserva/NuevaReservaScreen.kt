@@ -1,5 +1,7 @@
 package cl.appescuelamarcelapaz.app.ui.Reserva
 
+import android.app.DatePickerDialog
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,7 +27,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -33,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.appescuelamarcelapaz.app.data.local.NotificationHelper
+import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,11 +48,32 @@ fun NuevaReservaScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // 1. Instanciamos el contexto y el Helper de notificaciones
     val context = LocalContext.current
     val notificationHelper = remember { NotificationHelper(context) }
 
-    // 2. Modificamos el LaunchedEffect para lanzar la notificación al tener éxito
+    // --- Lógica del DatePicker ---
+    var mostrarDatePicker by remember { mutableStateOf(false) }
+    val calendario = Calendar.getInstance()
+
+    if (mostrarDatePicker) {
+        DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                // Formateamos a YYYY-MM-DD (el mes en Calendar empieza en 0)
+                val mesFormateado = String.format("%02d", month + 1)
+                val diaFormateado = String.format("%02d", dayOfMonth)
+                viewModel.onFechaChange("$year-$mesFormateado-$diaFormateado")
+                mostrarDatePicker = false
+            },
+            calendario.get(Calendar.YEAR),
+            calendario.get(Calendar.MONTH),
+            calendario.get(Calendar.DAY_OF_MONTH)
+        ).apply {
+            // Opcional: evitar que seleccionen fechas pasadas en el calendario
+            datePicker.minDate = System.currentTimeMillis() - 1000
+        }.show()
+    }
+
     LaunchedEffect(uiState.reservaExitosa) {
         if (uiState.reservaExitosa) {
             notificationHelper.crearCanalNotificacion()
@@ -105,14 +132,18 @@ fun NuevaReservaScreen(
 
         Spacer(Modifier.height(8.dp))
 
+        // --- CAMPO DE FECHA MODIFICADO CON EL NATIVO ---
         OutlinedTextField(
             value = uiState.fecha,
-            onValueChange = viewModel::onFechaChange,
-            label = { Text("Fecha (YYYY-MM-DD)") },
+            onValueChange = { },
+            readOnly = true, // Evita que el teclado se abra
+            label = { Text("Fecha (Seleccionar)") },
             leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = null) },
             isError = uiState.fechaError != null,
             supportingText = { uiState.fechaError?.let { Text(it, color = MaterialTheme.colorScheme.error) } },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { mostrarDatePicker = true } // Abre el calendario al tocar
         )
 
         Spacer(Modifier.height(8.dp))

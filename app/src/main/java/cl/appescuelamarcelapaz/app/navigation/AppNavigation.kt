@@ -13,9 +13,9 @@ import androidx.navigation.compose.rememberNavController
 import cl.appescuelamarcelapaz.app.data.local.UserPreferences
 import cl.appescuelamarcelapaz.app.data.repository.AuthRepository
 import cl.appescuelamarcelapaz.app.domain.model.Rol
+import cl.appescuelamarcelapaz.app.ui.Reserva.NuevaReservaScreen
 import cl.appescuelamarcelapaz.app.ui.home.HomeScreen
 import cl.appescuelamarcelapaz.app.ui.login.LoginScreen
-import cl.appescuelamarcelapaz.app.ui.reserva.NuevaReservaScreen
 import kotlinx.coroutines.flow.first
 
 sealed class Route(val path: String) {
@@ -62,14 +62,19 @@ fun AppNavigation() {
             composable(Route.Home.path) {
                 HomeScreen(
                     rol = rolSeleccionado,
-                    onNavigateToReserva = { navController.navigate(Route.NuevaReserva.path) }
+                    onNavigateToReserva = { navController.navigate(Route.NuevaReserva.path) },
+                    onLogout = {
+                        navController.navigate(Route.Login.path) {
+                            // Borra todo el historial para que no pueda volver atrás
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
                 )
             }
 
             composable(Route.NuevaReserva.path) {
                 NuevaReservaScreen(
                     onReservaCreada = {
-                        // Al terminar, volvemos al Home
                         navController.popBackStack()
                     }
                 )
