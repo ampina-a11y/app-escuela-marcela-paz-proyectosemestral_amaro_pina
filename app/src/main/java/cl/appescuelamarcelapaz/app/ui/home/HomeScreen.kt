@@ -1,7 +1,11 @@
 package cl.appescuelamarcelapaz.app.ui.home
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -9,6 +13,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Room
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -19,19 +24,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import cl.appescuelamarcelapaz.app.domain.model.Rol
 
-// Estructura para definir las pestañas dinámicamente
 data class TabItem(
     val label: String,
     val icon: ImageVector
 )
 
 @Composable
-fun HomeScreen(rol: Rol) {
-    // Definimos las pestañas según el rol
+fun HomeScreen(
+    rol: Rol,
+    onNavigateToReserva: () -> Unit // Callback para viajar al formulario
+) {
     val tabs = if (rol == Rol.INSPECTORIA) {
         listOf(
             TabItem("Solicitudes", Icons.Default.List),
@@ -62,17 +70,20 @@ fun HomeScreen(rol: Rol) {
             }
         }
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            // Aquí iremos conectando las pantallas reales
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
             if (rol == Rol.INSPECTORIA) {
                 when (selectedIndex) {
-                    0 -> PlaceholderContent("Solicitudes Pendientes (Inspectoría)")
+                    0 -> ContentInspectoriaSolicitudes()
                     1 -> PlaceholderContent("Gestión de Espacios")
                     2 -> PlaceholderContent("Perfil de Inspectoría")
                 }
             } else {
                 when (selectedIndex) {
-                    0 -> PlaceholderContent("Catálogo de Espacios")
+                    0 -> ContentSolicitanteCatalogo(onNavigateToReserva)
                     1 -> PlaceholderContent("Mis Reservas")
                     2 -> PlaceholderContent("Perfil de Solicitante")
                 }
@@ -81,10 +92,40 @@ fun HomeScreen(rol: Rol) {
     }
 }
 
-// Un componente temporal para no dejar la pantalla en blanco
+@Composable
+private fun ContentSolicitanteCatalogo(onNavigateToReserva: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("Catálogo de Espacios")
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = onNavigateToReserva) {
+            Text("Reservar un espacio")
+        }
+    }
+}
+
+@Composable
+private fun ContentInspectoriaSolicitudes() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("Solicitudes Pendientes")
+        Spacer(modifier = Modifier.height(16.dp))
+        Text("Aquí aparecerán las reservas para aprobar/rechazar")
+    }
+}
+
 @Composable
 private fun PlaceholderContent(text: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
         Text(text = text)
     }
 }

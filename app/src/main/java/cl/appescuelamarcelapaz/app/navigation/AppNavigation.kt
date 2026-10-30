@@ -15,11 +15,13 @@ import cl.appescuelamarcelapaz.app.data.repository.AuthRepository
 import cl.appescuelamarcelapaz.app.domain.model.Rol
 import cl.appescuelamarcelapaz.app.ui.home.HomeScreen
 import cl.appescuelamarcelapaz.app.ui.login.LoginScreen
+import cl.appescuelamarcelapaz.app.ui.reserva.NuevaReservaScreen
 import kotlinx.coroutines.flow.first
 
 sealed class Route(val path: String) {
     object Login : Route("login")
     object Home : Route("home")
+    object NuevaReserva : Route("nueva_reserva")
 }
 
 @Composable
@@ -28,12 +30,10 @@ fun AppNavigation() {
     val context = LocalContext.current
     val authRepository = remember { AuthRepository(UserPreferences(context)) }
 
-    // Leemos el estado inicial
     var rolSeleccionado by remember { mutableStateOf(Rol.SOLICITANTE) }
     var isLoading by remember { mutableStateOf(true) }
     var startRoute by remember { mutableStateOf(Route.Login.path) }
 
-    // Al iniciar la app, verificamos si ya hay sesión
     LaunchedEffect(Unit) {
         val isLoggedIn = authRepository.isLoggedInFlow.first()
         if (isLoggedIn) {
@@ -58,8 +58,21 @@ fun AppNavigation() {
                     }
                 )
             }
+
             composable(Route.Home.path) {
-                HomeScreen(rol = rolSeleccionado)
+                HomeScreen(
+                    rol = rolSeleccionado,
+                    onNavigateToReserva = { navController.navigate(Route.NuevaReserva.path) }
+                )
+            }
+
+            composable(Route.NuevaReserva.path) {
+                NuevaReservaScreen(
+                    onReservaCreada = {
+                        // Al terminar, volvemos al Home
+                        navController.popBackStack()
+                    }
+                )
             }
         }
     }
